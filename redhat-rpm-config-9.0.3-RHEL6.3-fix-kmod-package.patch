@@ -1,0 +1,12 @@
+diff -urNp redhat-rpm-config-9.0.3_orig/macros redhat-rpm-config-9.0.3/macros
+--- redhat-rpm-config-9.0.3_orig/macros	2012-03-05 04:11:58.690132531 -0500
++++ redhat-rpm-config-9.0.3/macros	2012-03-05 04:12:24.109104742 -0500
+@@ -229,7 +229,7 @@ unset DISPLAY\
+ 	then \
+ 		nobuildreqs="yes" \
+ 	fi \
+-	override_filelist="$filelist" override_preamble="$preamble" nobuildreqs="$nobuildreqs" %{kmodtool} rpmtemplate %{-n*}%{!-n:%name} %{kverrel} $flavors_to_build 2>/dev/null \
++	override_filelist="$filelist" override_preamble="$preamble" nobuildreqs="$nobuildreqs" kmod_version=%kmod_version kmod_release=%kmod_release %{kmodtool} rpmtemplate %{-n*}%{!-n:%name} %{kverrel} $flavors_to_build 2>/dev/null \
+ )}
+ 
+ #==============================================================================

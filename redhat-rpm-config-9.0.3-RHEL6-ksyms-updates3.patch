@@ -1,0 +1,11 @@
+diff -urNp redhat-rpm-config-9.0.3_orig/find-provides.ksyms redhat-rpm-config-9.0.3/find-provides.ksyms
+--- redhat-rpm-config-9.0.3_orig/find-provides.ksyms	2008-05-06 19:08:20.000000000 -0400
++++ redhat-rpm-config-9.0.3/find-provides.ksyms	2011-01-24 01:50:09.495173077 -0500
+@@ -4,6 +4,6 @@ IFS=$'\n'
+ 
+ for module in $(grep -E '/lib/modules/.+\.ko$'); do
+     nm $module \
+-    | sed -r -ne 's:^0*([0-9a-f]+) A __crc_(.+):ksym(\2) = \1:p'
++    | sed -r -ne 's:^0*([0-9a-f]+) A __crc_(.+):ksym(\2) = 0x\1:p'
+ done \
+ | sort -u

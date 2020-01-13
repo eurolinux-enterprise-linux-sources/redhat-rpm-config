@@ -1,0 +1,24 @@
+diff -urNp redhat-rpm-config-9.0.3_orig/kmodtool redhat-rpm-config-9.0.3/kmodtool
+--- redhat-rpm-config-9.0.3_orig/kmodtool	2011-02-03 01:05:19.638411071 -0500
++++ redhat-rpm-config-9.0.3/kmodtool	2011-02-03 01:14:30.512473567 -0500
+@@ -135,7 +135,7 @@ Requires(post):   /sbin/depmod
+ Requires(postun): /sbin/depmod
+ EOF
+ 
+-    if [ "no" != "$nobuildreqs" ]
++    if [ "yes" != "$nobuildreqs" ]
+     then
+         echo "BuildRequires: kernel${dashvariant}-devel"
+     fi
+diff -urNp redhat-rpm-config-9.0.3_orig/macros redhat-rpm-config-9.0.3/macros
+--- redhat-rpm-config-9.0.3_orig/macros	2011-02-03 01:05:19.628411129 -0500
++++ redhat-rpm-config-9.0.3/macros	2011-02-03 01:12:28.893491072 -0500
+@@ -227,7 +227,7 @@ unset DISPLAY\
+ 	then \
+ 		nobuildreqs="yes" \
+ 	fi \
+-	override_filelist="$filelist" override_preamble="$preamble" nobuildreqs="$buildreqs" %{kmodtool} rpmtemplate %{-n*}%{!-n:%name} %{kverrel} $flavors_to_build 2>/dev/null \
++	override_filelist="$filelist" override_preamble="$preamble" nobuildreqs="$nobuildreqs" %{kmodtool} rpmtemplate %{-n*}%{!-n:%name} %{kverrel} $flavors_to_build 2>/dev/null \
+ )}
+ 
+ #==============================================================================

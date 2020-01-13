@@ -1,0 +1,20 @@
+--- /usr/lib/rpm/redhat/kmodtool        2012-03-06 01:27:45.000000000 -0600
++++ kmodtool    2012-07-28 08:56:45.000000000 -0500
+@@ -52,7 +52,7 @@
+ get_verrel ()
+ {
+   verrel=${1:-$(uname -r)}
+-  verrel=${verrel%%$knownvariants}
++  verrel=${verrel/%.$knownvariants/}
+ }
+
+ print_verrel ()
+@@ -65,7 +65,7 @@
+ {
+   get_verrel $@
+   variant=${1:-$(uname -r)}
+-  variant=${variant##$verrel}
++  variant=${variant/#$verrel?(.)/}
+   variant=${variant:-'""'}
+ }
+ 

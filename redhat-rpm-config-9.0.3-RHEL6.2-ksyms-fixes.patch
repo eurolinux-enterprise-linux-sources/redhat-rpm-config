@@ -1,0 +1,105 @@
+diff -urNp redhat-rpm-config-9.0.3_orig/find-provides.ksyms redhat-rpm-config-9.0.3/find-provides.ksyms
+--- redhat-rpm-config-9.0.3_orig/find-provides.ksyms	2011-08-22 03:00:53.257268315 -0400
++++ redhat-rpm-config-9.0.3/find-provides.ksyms	2011-08-22 03:02:49.980268228 -0400
+@@ -4,6 +4,7 @@ IFS=$'\n'
+ 
+ for module in $(grep -E '/lib/modules/.+\.ko$'); do
+     nm $module \
+-    | sed -r -ne 's:^0*([0-9a-f]+) A __crc_(.+):ksym(\2) = 0x\1:p'
++    | sed -r -ne 's:^0*([0-9a-f]+) A __crc_(.+):0x\1 \2:p' \
++    | awk --non-decimal-data '{printf("ksym(%s) = 0x%08x\n", $2, $1)}'
+ done \
+ | sort -u
+diff -urNp redhat-rpm-config-9.0.3_orig/find-requires.ksyms redhat-rpm-config-9.0.3/find-requires.ksyms
+--- redhat-rpm-config-9.0.3_orig/find-requires.ksyms	2011-08-22 03:00:53.240267597 -0400
++++ redhat-rpm-config-9.0.3/find-requires.ksyms	2011-08-22 03:02:56.742455501 -0400
+@@ -1,13 +1,21 @@
+ #! /bin/bash
++#
++# This script is called during external module building to create dependencies
++# both upon the RHEL kernel, and on additional external modules. Symbols that
++# cannot be reconciled against those provided by the kernel are assumed to be
++# provided by an external module and "ksym" replaces th regular "kernel" dep.
+ 
+ IFS=$'\n'
+ 
++# Extract all of the symbols provided by this module.
+ all_provides() {
+     nm "$@" \
+-    | sed -r -ne 's:^([0-9a-f]+) A __crc_(.+):\1\t\2:p' \
+-    | sort -k2 -u
++    | sed -r -ne 's:^0*([0-9a-f]+) A __crc_(.+):0x\1 \2:p' \
++    | awk --non-decimal-data '{printf("0x%08x\t%s\n", $1, $2)}' \
++    | sort -k2,2 -u
+ }
+ 
++# Extract all of the requirements of this module.
+ all_requires() {
+     for module in "$@"; do
+         set -- $(/sbin/modinfo -F vermagic "$module" | sed -e 's: .*::' -e q)
+@@ -17,7 +25,17 @@ all_requires() {
+             {printf("0x%08x\t%s\n", $1, $2)}' \
+         | sed -r -e 's:$:\t'"$1"':'
+     done \
+-    | sort -k2 -u
++    | sort -k2,2 -u
++}
++
++# Filter out requirements fulfilled by the module itself.
++mod_requires() {
++    module=$1
++
++    join -t $'\t' -j 2 -v 1 \
++        <(all_requires "$module") \
++        <(all_provides "$module") \
++    | sort -k1,1 -u
+ }
+ 
+ if ! [ -e /sbin/modinfo -a -e /sbin/modprobe ]; then
+@@ -29,24 +47,20 @@ modules=($(grep -E '/lib/modules/.+\.ko$
+ if [ ${#modules[@]} -gt 0 ]; then
+     kernel=$(/sbin/modinfo -F vermagic "${modules[0]}" | sed -e 's: .*::' -e q)
+     symvers=$(mktemp -t ${0##*/}.XXXXX)
++
+     cat /usr/src/kernels/$kernel/Module.symvers | awk '
+         BEGIN { FS = "\t" ; OFS = "\t" }
+         { print $2 "\t" $1 }
+     ' \
+-    | sed -r -e 's:$:\t'"$1"':' \
++    | sed -r -e 's:$:\t'"$kernel"':' \
+     | sort -u > $symvers
+ 
+-    join -t '\t' -j 1 -a 2 $symvers <(
+-        # Filter out requirements that we fulfill ourself.
+-        join -t $'\t' -j 2 -v 1 \
+-            <(all_requires "${modules[@]}") \
+-            <(all_provides "${modules[@]}") \
+-        | sort -u) \
+-    | sort -u \
+-    | awk '
+-    { FS = "\t" ; OFS = "\t" }
+-    NF == 3 { print "kernel(" $1 ") = " $2
+-              next }
+-            { print "ksym(" $1 ") = " $2 }
+-    '
++    # Symbols matching with the kernel get a "kernel" dependency
++    join -t '\t' -j 1 $symvers <(mod_requires "${modules[@]}") | sort -u \
++    | awk '{ FS = "\t" ; OFS = "\t" } { print "kernel(" $1 ") = " $2 }'
++
++    # Symbols from elsewhere get a "ksym" dependency
++    join -t '\t' -j 1 -v 2 $symvers <(mod_requires "${modules[@]}") | sort -u \
++    | awk '{ FS = "\t" ; OFS = "\t" } { print "ksym(" $1 ") = " $2 }'
++
+ fi
+diff -urNp redhat-rpm-config-9.0.3_orig/kmodtool redhat-rpm-config-9.0.3/kmodtool
+--- redhat-rpm-config-9.0.3_orig/kmodtool	2011-08-22 03:00:53.260268336 -0400
++++ redhat-rpm-config-9.0.3/kmodtool	2011-08-22 03:03:03.448516810 -0400
+@@ -129,7 +129,7 @@ get_rpmtemplate ()
+     echo "%global _use_internal_dependency_generator 0"
+ 
+     cat <<EOF
+-Provides:         kernel-modules = ${verrel}${dotvariant}
++Provides:         kernel-modules >= ${verrel}${dotvariant}
+ Provides:         ${kmod_name}-kmod = %{?epoch:%{epoch}:}%{version}-%{release}
+ Requires(post):   /sbin/depmod
+ Requires(postun): /sbin/depmod

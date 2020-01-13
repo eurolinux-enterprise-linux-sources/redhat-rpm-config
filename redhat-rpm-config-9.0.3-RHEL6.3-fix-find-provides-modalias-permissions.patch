@@ -1,0 +1,11 @@
+diff -urNp redhat-rpm-config-9.0.3_orig/Makefile redhat-rpm-config-9.0.3/Makefile
+--- redhat-rpm-config-9.0.3_orig/Makefile	2008-05-06 19:08:20.000000000 -0400
++++ redhat-rpm-config-9.0.3/Makefile	2012-03-06 02:07:04.952939797 -0500
+@@ -15,6 +15,7 @@ install:
+ 	cp -pr * $(DESTDIR)/usr/lib/rpm/redhat/
+ 	rm -f $(DESTDIR)/usr/lib/rpm/redhat/Makefile
+ 	rm -f $(DESTDIR)/usr/lib/rpm/redhat/redhat-rpm-config.spec
++	chmod +x $(DESTDIR)/usr/lib/rpm/redhat/find-provides.d/modalias.prov
+ 
+ tag-archive:
+ 	git-tag -a $(CVSTAG)

@@ -1,0 +1,56 @@
+--- redhat-rpm-config-9.0.3/find-requires.ksyms.orig	2016-02-09 15:14:14.274838360 +0100
++++ redhat-rpm-config-9.0.3/find-requires.ksyms	2016-02-09 15:18:21.396662641 +0100
+@@ -12,7 +12,7 @@
+     nm "$@" \
+     | sed -r -ne 's:^0*([0-9a-f]+) A __crc_(.+):0x\1 \2:p' \
+     | awk --non-decimal-data '{printf("0x%08x\t%s\n", $1, $2)}' \
+-    | LANG=C sort -k2,2 -u
++    | LC_ALL=C sort -k2,2 -u
+ }
+ 
+ # Extract all of the requirements of this module.
+@@ -25,17 +25,17 @@
+             {printf("0x%08x\t%s\n", $1, $2)}' \
+         | sed -r -e 's:$:\t'"$1"':'
+     done \
+-    | LANG=C sort -k2,2 -u
++    | LC_ALL=C sort -k2,2 -u
+ }
+ 
+ # Filter out requirements fulfilled by the module itself.
+ mod_requires() {
+     module=$1
+ 
+-    LANG=C join -t $'\t' -j 2 -v 1 \
++    LC_ALL=C join -t $'\t' -j 2 -v 1 \
+         <(all_requires "$module") \
+         <(all_provides "$module") \
+-    | LANG=C sort -k1,1 -u
++    | LC_ALL=C sort -k1,1 -u
+ }
+ 
+ if ! [ -e /sbin/modinfo -a -e /sbin/modprobe ]; then
+@@ -96,19 +96,19 @@
+         { print $2 "\t" $1 }
+     ' \
+     | sed -r -e 's:$:\t'"$kernel"':' \
+-    | LANG=C sort -k1,1 -u > $symvers
++    | LC_ALL=C sort -k1,1 -u > $symvers
+ 
+     # Symbols matching with the kernel get a "kernel" dependency
+-    LANG=C join -t '\t' -j 1 $symvers <(mod_requires "${modules[@]}") | LANG=C sort -u \
++    LC_ALL=C join -t $'\t' -j 1 $symvers <(mod_requires "${modules[@]}") | LC_ALL=C sort -u \
+     | awk '{ FS = "\t" ; OFS = "\t" } { print "kernel(" $1 ") = " $2 }'
+ 
+     # Symbols from elsewhere get a "ksym" dependency
+-    LANG=C join -t '\t' -j 1 -v 2 $symvers <(mod_requires "${modules[@]}") | LANG=C sort -u \
++    LC_ALL=C join -t $'\t' -j 1 -v 2 $symvers <(mod_requires "${modules[@]}") | LC_ALL=C sort -u \
+     | awk '{ FS = "\t" ; OFS = "\t" } { print "ksym(" $1 ") = " $2 }'
+ 
+     # Check kABI if the kabi-whitelists package is installed
+     # Do this last so we can try to output this error at the end
+-    kabi_check_symbols=($(LANG=C join -t '\t' -j 1 $symvers <(mod_requires "${modules[@]}") | LANG=C sort -u \
++    kabi_check_symbols=($(LC_ALL=C join -t $'\t' -j 1 $symvers <(mod_requires "${modules[@]}") | LC_ALL=C sort -u \
+     | awk '{ FS = "\t" ; OFS = "\t" } { print $1 }'))
+     check_kabi "${kabi_check_symbols[@]}"
+ fi

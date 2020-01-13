@@ -1,0 +1,11 @@
+--- redhat-rpm-config-9.0.3/brp-strip-comment-note.orig	2016-03-29 16:42:58.427395929 +0200
++++ redhat-rpm-config-9.0.3/brp-strip-comment-note	2016-03-29 16:45:20.712454460 +0200
+@@ -13,7 +13,7 @@
+ # for already stripped elf files in the build root
+ for f in `find $RPM_BUILD_ROOT -type f \( -perm -0100 -or -perm -0010 -or -perm -0001 \) -exec file {} \; | \
+         grep -v "^${RPM_BUILD_ROOT}/\?usr/lib/debug"  | \
+-	sed -n -e 's/^\(.*\):[ 	]*ELF.*, stripped/\1/p'`; do
++	sed -n -e 's/^\(.*\):[ 	]*ELF.*, stripped.*/\1/p'`; do
+ 	note="-R .note"
+ 	if $OBJDUMP -h $f | grep '^[ 	]*[0-9]*[ 	]*.note[ 	]' -A 1 | \
+ 		grep ALLOC >/dev/null; then

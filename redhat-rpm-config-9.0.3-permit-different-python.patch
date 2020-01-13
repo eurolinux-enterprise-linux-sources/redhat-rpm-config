@@ -1,0 +1,28 @@
+From 2a452bba1e3c24e25b6310d6538b56f33634925a Mon Sep 17 00:00:00 2001
+From: Panu Matilainen <pmatilai@redhat.com>
+Date: Tue, 26 Jan 2010 13:55:54 +0200
+Subject: [PATCH] Permit using different python version for
+ brp-python-bytecompile (#521141) - pass %{__python} macro to
+ brp-python-bytecompile instead of using   hardwired /usr/bin/python, as
+ suggested by Bowe Strickland
+
+---
+ macros | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/macros b/macros
+index cb9398c..69ac0f3 100644
+--- a/macros
++++ b/macros
+@@ -95,7 +95,7 @@
+     %{!?__debug_package:/usr/lib/rpm/redhat/brp-strip %{__strip}} \
+     /usr/lib/rpm/redhat/brp-strip-static-archive %{__strip} \
+     /usr/lib/rpm/redhat/brp-strip-comment-note %{__strip} %{__objdump} \
+-    /usr/lib/rpm/brp-python-bytecompile \
++    /usr/lib/rpm/brp-python-bytecompile %{__python} \
+     /usr/lib/rpm/redhat/brp-python-hardlink \
+     %{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars} \
+ %{nil}
+-- 
+1.9.3
+

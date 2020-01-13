@@ -1,0 +1,9 @@
+diff -up redhat-rpm-config-9.0.3/rpmrc.macrofiles redhat-rpm-config-9.0.3/rpmrc
+--- redhat-rpm-config-9.0.3/rpmrc.macrofiles	2012-10-30 07:56:57.729750722 +0200
++++ redhat-rpm-config-9.0.3/rpmrc	2012-10-30 07:57:06.578717993 +0200
+@@ -77,5 +77,3 @@ buildarchtranslate: sparcv9v: sparcv9
+ buildarchtranslate: armv5tejl: armv5tel
+ buildarchtranslate: armv6l: armv5tel
+ buildarchtranslate: armv7l: armv5tel
+-
+-macrofiles:     /usr/lib/rpm/macros:/usr/lib/rpm/%{_target}/macros:/usr/lib/rpm/redhat/macros:/etc/rpm/macros.*:/etc/rpm/macros:/etc/rpm/%{_target}/macros:~/.rpmmacros

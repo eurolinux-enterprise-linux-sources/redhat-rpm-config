@@ -1,0 +1,51 @@
+diff -urNp redhat-rpm-config-9.0.3_orig/find-requires.ksyms redhat-rpm-config-9.0.3/find-requires.ksyms
+--- redhat-rpm-config-9.0.3_orig/find-requires.ksyms	2012-03-05 03:57:45.501663299 -0500
++++ redhat-rpm-config-9.0.3/find-requires.ksyms	2012-03-05 03:59:42.201715699 -0500
+@@ -12,7 +12,7 @@ all_provides() {
+     nm "$@" \
+     | sed -r -ne 's:^0*([0-9a-f]+) A __crc_(.+):0x\1 \2:p' \
+     | awk --non-decimal-data '{printf("0x%08x\t%s\n", $1, $2)}' \
+-    | sort -k2,2 -u
++    | LANG=C sort -k2,2 -u
+ }
+ 
+ # Extract all of the requirements of this module.
+@@ -25,17 +25,17 @@ all_requires() {
+             {printf("0x%08x\t%s\n", $1, $2)}' \
+         | sed -r -e 's:$:\t'"$1"':'
+     done \
+-    | sort -k2,2 -u
++    | LANG=C sort -k2,2 -u
+ }
+ 
+ # Filter out requirements fulfilled by the module itself.
+ mod_requires() {
+     module=$1
+ 
+-    join -t $'\t' -j 2 -v 1 \
++    LANG=C join -t $'\t' -j 2 -v 1 \
+         <(all_requires "$module") \
+         <(all_provides "$module") \
+-    | sort -k1,1 -u
++    | LANG=C sort -k1,1 -u
+ }
+ 
+ if ! [ -e /sbin/modinfo -a -e /sbin/modprobe ]; then
+@@ -53,14 +53,14 @@ if [ ${#modules[@]} -gt 0 ]; then
+         { print $2 "\t" $1 }
+     ' \
+     | sed -r -e 's:$:\t'"$kernel"':' \
+-    | sort -u > $symvers
++    | LANG=C sort -k1,1 -u > $symvers
+ 
+     # Symbols matching with the kernel get a "kernel" dependency
+-    join -t '\t' -j 1 $symvers <(mod_requires "${modules[@]}") | sort -u \
++    LANG=C join -t '\t' -j 1 $symvers <(mod_requires "${modules[@]}") | LANG=C sort -u \
+     | awk '{ FS = "\t" ; OFS = "\t" } { print "kernel(" $1 ") = " $2 }'
+ 
+     # Symbols from elsewhere get a "ksym" dependency
+-    join -t '\t' -j 1 -v 2 $symvers <(mod_requires "${modules[@]}") | sort -u \
++    LANG=C join -t '\t' -j 1 -v 2 $symvers <(mod_requires "${modules[@]}") | LANG=C sort -u \
+     | awk '{ FS = "\t" ; OFS = "\t" } { print "ksym(" $1 ") = " $2 }'
+ 
+ fi

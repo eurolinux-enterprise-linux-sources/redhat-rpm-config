@@ -1,0 +1,11 @@
+diff -urNp redhat-rpm-config-9.0.3_orig/macros redhat-rpm-config-9.0.3/macros
+--- redhat-rpm-config-9.0.3_orig/macros	2011-02-04 07:10:53.503411831 -0500
++++ redhat-rpm-config-9.0.3/macros	2011-02-04 07:11:54.814473798 -0500
+@@ -215,6 +215,7 @@ unset DISPLAY\
+ 	fi \
+ 	echo "%%global flavors_to_build ${flavors_to_build:-%%nil}" \
+ 	echo "%%global kernel_source() /usr/src/kernels/%kverrel\\\$([ %%%%{1} = default ] || echo ".%%%%{1}")" \
++	echo "%%global kernel_module_package_moddir() extra" \
+ 	if [ ! -z "%{-f*}" ] \
+ 	then \
+ 		filelist="%{-f*}" \
